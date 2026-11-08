@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Onward order desk{% endblock %}</title>
+<style>
+  /* Everything is inline: one request, no fonts or images to fetch on slow mobile data. */
+  :root {
+    --kraft: #b48a58;      /* corrugated box */
+    --kraft-dark: #8c6a40;
+    --label: #ffffff;      /* the shipping label */
+    --ink: #1a1f2b;        /* thermal-print black */
+    --muted: #5b6170;
+    --tape: #f2c230;       /* courier tape */
+    --route: #1d4ed8;      /* links and focus */
+    --error: #b42318;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 12px 48px;
+    background: var(--kraft) repeating-linear-gradient(90deg, transparent 0 22px, rgba(0,0,0,.035) 22px 24px);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  }
+  .label {
+    max-width: 620px; margin: 0 auto; background: var(--label);
+    border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--kraft-dark);
+  }
+  .label > section { padding: 18px 22px; border-top: 2px solid var(--ink); }
+  .label > section:first-child { border-top: 0; }
+  .brand { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; background: var(--ink); color: var(--label); }
+  .brand strong { font-size: 1.6rem; letter-spacing: -.02em; }
+  .brand span { font-size: .85rem; opacity: .85; }
+  h1 { font-size: 1.35rem; line-height: 1.25; margin: 0 0 4px; }
+  .owner { margin: 0; color: var(--muted); }
+  .code { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; letter-spacing: .04em; }
+  .stamp {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 0 !important;
+    background: var(--tape);
+  }
+  .stamp div { padding: 10px 14px; border-left: 2px solid var(--ink); font-size: .85rem; }
+  .stamp div:first-child { border-left: 0; }
+  .stamp b { display: block; font-weight: 600; font-size: .75rem; color: var(--ink); opacity: .75; }
+  form { display: grid; gap: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display: grid; gap: 4px; font-weight: 600; font-size: .95rem; }
+  input, select {
+    font: inherit; padding: 10px 12px; border: 2px solid var(--ink); border-radius: 0; background: #fff; color: var(--ink);
+  }
+  input[type=checkbox] { width: 20px; height: 20px; }
+  .check { display: flex; align-items: center; gap: 10px; font-weight: 600; }
+  .hint { font-weight: 400; color: var(--muted); font-size: .85rem; }
+  .err { color: var(--error); font-weight: 500; font-size: .85rem; }
+  .invalid { border-color: var(--error); }
+  button {
+    font: inherit; font-weight: 700; padding: 12px 18px; cursor: pointer;
+    background: var(--ink); color: var(--label); border: 2px solid var(--ink);
+  }
+  button:hover { background: #333a4a; }
+  :focus-visible { outline: 3px solid var(--route); outline-offset: 2px; }
+  a { color: var(--route); }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 6px 0; border-bottom: 1px dashed #c9ccd3; }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { border-bottom: 0; font-weight: 700; font-size: 1.15rem; padding-top: 10px; }
+  .ref { font-size: 1.9rem; font-weight: 700; margin: 4px 0 0; }
+  @media (max-width: 480px) {
+    .row { grid-template-columns: 1fr; }
+    .stamp { grid-template-columns: 1fr; }
+    .stamp div { border-left: 0; border-top: 2px solid var(--ink); }
+    .stamp div:first-child { border-top: 0; }
+  }
+</style>
+</head>
+<body>
+<main class="label">
+  <section class="brand">
+    <strong>Onward</strong>
+    <span>Order desk, {{ environment }}</span>
+  </section>
+  <section>
+    <h1>{{ lab_name }}</h1>
+    <p class="owner">Built by {{ owner_name }}</p>
+  </section>
+  {% block content %}{% endblock %}
+  <section class="stamp" aria-label="Answered by">
+    <div><b>Answered by server</b><span class="code">{{ server.instance }}</span></div>
+    <div><b>Availability Zone</b><span class="code">{{ server.az }}</span></div>
+    <div><b>Private IP</b><span class="code">{{ server.ip }}</span></div>
+  </section>
+  <section style="padding-top:8px;padding-bottom:8px;font-size:.8rem;color:var(--muted)">App version <span class="code">{{ version }}</span>. Refresh to see the load balancer pick another server.</section>
+</main>
+</body>
+</html>

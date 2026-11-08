@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Delivery booked {{ order.reference }}{% endblock %}
+{% block content %}
+<section>
+  <p style="margin:0">Delivery booked. Share this reference with the recipient.</p>
+  <p class="ref code">{{ order.reference }}</p>
+</section>
+<section>
+  <table>
+    <tr><td>From area {{ order.request.pickup_zone }} to area {{ order.request.dropoff_zone }}, {{ order.request.speed }}</td><td>${{ order.quote.base }}</td></tr>
+    <tr><td>Distance</td><td>${{ order.quote.distance_fee }}</td></tr>
+    <tr><td>Weight, {{ '%g'|format(order.request.weight_kg) }} kg</td><td>${{ order.quote.weight_fee }}</td></tr>
+    {% if order.request.fragile %}<tr><td>Fragile handling</td><td>${{ order.quote.handling_fee }}</td></tr>{% endif %}
+    <tr class="total"><td>Total</td><td>${{ order.quote.total }}</td></tr>
+  </table>
+  <p style="margin:12px 0 0">Expected by <strong>{{ order.quote.eta.strftime('%a %d %b, %H:%M') }} WAT</strong> for {{ order.request.merchant }}.</p>
+  <p style="margin:12px 0 0"><a href="/">Book another delivery</a></p>
+</section>
+{% endblock %}

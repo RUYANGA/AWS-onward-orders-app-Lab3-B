@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+  <h2 style="margin:0 0 12px;font-size:1.1rem">Book a delivery</h2>
+  <form method="post" action="/orders" novalidate>
+    <label>Merchant
+      <input name="merchant" value="{{ form.get('merchant','') }}" autocomplete="organization"
+             class="{{ 'invalid' if errors.merchant }}" required>
+      {% if errors.merchant %}<span class="err">{{ errors.merchant }}</span>{% endif %}
+    </label>
+    <label>Recipient phone
+      <input name="recipient_phone" type="tel" inputmode="tel" value="{{ form.get('recipient_phone','') }}"
+             class="{{ 'invalid' if errors.recipient_phone }}" required>
+      {% if errors.recipient_phone %}<span class="err">{{ errors.recipient_phone }}</span>{% endif %}
+    </label>
+    <div class="row">
+      {% for field, title in [('pickup_zone', 'Pickup area'), ('dropoff_zone', 'Delivery area')] %}
+      <label>{{ title }}
+        <select name="{{ field }}" class="{{ 'invalid' if errors[field] }}">
+          <option value="">Choose</option>
+          {% for code, z in zones.items() %}
+          <option value="{{ code }}" {{ 'selected' if form.get(field) == code }}>{{ z.label }}</option>
+          {% endfor %}
+        </select>
+        {% if errors[field] %}<span class="err">{{ errors[field] }}</span>{% endif %}
+      </label>
+      {% endfor %}
+    </div>
+    <div class="row">
+      <label>Weight in kg <span class="hint">0.1 to 30</span>
+        <input name="weight_kg" inputmode="decimal" value="{{ form.get('weight_kg','') }}"
+               class="{{ 'invalid' if errors.weight_kg }}" required>
+        {% if errors.weight_kg %}<span class="err">{{ errors.weight_kg }}</span>{% endif %}
+      </label>
+      <label>Speed
+        <select name="speed" class="{{ 'invalid' if errors.speed }}">
+          {% for code, s in speeds.items() %}
+          <option value="{{ code }}" {{ 'selected' if form.get('speed', 'standard') == code }}>{{ s.label }}</option>
+          {% endfor %}
+        </select>
+        {% if errors.speed %}<span class="err">{{ errors.speed }}</span>{% endif %}
+      </label>
+    </div>
+    <label class="check"><input type="checkbox" name="fragile" {{ 'checked' if form.get('fragile') }}> Fragile, handle with care</label>
+    <div><button type="submit">Book delivery</button></div>
+  </form>
+</section>
+{% endblock %}
