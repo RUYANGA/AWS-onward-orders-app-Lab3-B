@@ -1,19 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Delivery booked {{ order.reference }}{% endblock %}
+{% block lede %}Your delivery is booked. Share the booking reference with the recipient.{% endblock %}
+
+{% set req = order.request %}
+{% set q = order.quote %}
+
 {% block content %}
-<section>
-  <p style="margin:0">Delivery booked. Share this reference with the recipient.</p>
-  <p class="ref code">{{ order.reference }}</p>
-</section>
-<section>
-  <table>
-    <tr><td>From area {{ order.request.pickup_zone }} to area {{ order.request.dropoff_zone }}, {{ order.request.speed }}</td><td>${{ order.quote.base }}</td></tr>
-    <tr><td>Distance</td><td>${{ order.quote.distance_fee }}</td></tr>
-    <tr><td>Weight, {{ '%g'|format(order.request.weight_kg) }} kg</td><td>${{ order.quote.weight_fee }}</td></tr>
-    {% if order.request.fragile %}<tr><td>Fragile handling</td><td>${{ order.quote.handling_fee }}</td></tr>{% endif %}
-    <tr class="total"><td>Total</td><td>${{ order.quote.total }}</td></tr>
-  </table>
-  <p style="margin:12px 0 0">Expected by <strong>{{ order.quote.eta.strftime('%a %d %b, %H:%M') }} WAT</strong> for {{ order.request.merchant }}.</p>
-  <p style="margin:12px 0 0"><a href="/">Book another delivery</a></p>
+<section class="card" aria-labelledby="done-title">
+  <div class="card-body">
+    <div class="success" role="status">
+      <span class="success-icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 22 22"><path d="M5 11.5l4 4 8-9" fill="none" stroke="#0f9d58" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <div>
+        <h2 id="done-title" style="margin:0;font-size:1.25rem;color:var(--ink)">Delivery booked</h2>
+        <p style="margin:4px 0 0;color:var(--muted)">For <strong style="color:var(--ink)">{{ req.merchant }}</strong>, expected by
+          <strong style="color:var(--ink)">{{ q.eta.strftime('%a %d %b, %H:%M') }} WAT</strong>.</p>
+      </div>
+    </div>
+
+    <div class="ref-box">
+      <span>Booking reference</span>
+      <p class="ref">{{ order.reference }}</p>
+    </div>
+
+    <div class="route" aria-label="Route">
+      <div class="stop"><span>Pickup</span><strong>Area {{ req.pickup_zone }} · {{ zones[req.pickup_zone].name }}</strong></div>
+      <svg width="28" height="16" viewBox="0 0 28 16" aria-hidden="true"><path d="M2 8h22M18 3l5 5-5 5" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="stop"><span>Delivery</span><strong>Area {{ req.dropoff_zone }} · {{ zones[req.dropoff_zone].name }}</strong></div>
+    </div>
+
+    <dl class="kv" style="margin-top:16px">
+      <div><dt>Service</dt><dd>{{ speeds[req.speed].name }}</dd></div>
+      <div><dt>Weight</dt><dd>{{ '%g'|format(req.weight_kg) }} kg{{ ', fragile' if req.fragile }}</dd></div>
+      <div><dt>Recipient phone</dt><dd>{{ req.recipient_phone }}</dd></div>
+    </dl>
+
+    <table class="bill" aria-label="Price breakdown">
+      <tr><th scope="row">{{ speeds[req.speed].name }} base fee</th><td>${{ q.base }}</td></tr>
+      <tr><th scope="row">Distance</th><td>${{ q.distance_fee }}</td></tr>
+      <tr><th scope="row">Weight above {{ pricing.included_kg }} kg</th><td>${{ q.weight_fee }}</td></tr>
+      {% if req.fragile %}<tr><th scope="row">Fragile handling</th><td>${{ q.handling_fee }}</td></tr>{% endif %}
+      <tr class="total"><th scope="row">Total</th><td>${{ q.total }}</td></tr>
+    </table>
+
+    <div class="actions" style="margin-top:20px">
+      <p>All prices in USD.</p>
+      <a class="btn" href="/">Book another delivery</a>
+    </div>
+  </div>
 </section>
 {% endblock %}

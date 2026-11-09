@@ -33,6 +33,14 @@ def create_app() -> Flask:
             "server": runtime.server_info(),
             "zones": orders.ZONES,
             "speeds": orders.SPEEDS,
+            "pricing": {
+                "ring_fee": orders.RING_FEE,
+                "included_kg": orders.INCLUDED_KG,
+                "extra_kg_fee": orders.EXTRA_KG_FEE,
+                "fragile_fee": orders.FRAGILE_FEE,
+                "min_kg": orders.MIN_WEIGHT_KG,
+                "max_kg": orders.MAX_WEIGHT_KG,
+            },
         }
 
     @app.get("/")
@@ -54,6 +62,21 @@ def create_app() -> Flask:
     @app.get("/whoami")
     def whoami():
         return jsonify(version=runtime.version(), environment=runtime.environment(), **runtime.server_info())
+
+    @app.errorhandler(404)
+    def not_found(_exc):
+        return render_template("error.html", status=404, heading="Page not found",
+                               message="There is no page at this address."), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(_exc):
+        return render_template("error.html", status=405, heading="That action isn't available here",
+                               message="Use the booking form to place an order."), 405
+
+    @app.errorhandler(500)
+    def server_error(_exc):
+        return render_template("error.html", status=500, heading="The order desk hit a problem",
+                               message="Nothing was booked. Try again in a moment."), 500
 
     @app.after_request
     def headers(resp):
