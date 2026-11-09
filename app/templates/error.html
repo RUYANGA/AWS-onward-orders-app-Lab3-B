@@ -1,7 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Order desk unavailable{% endblock %}
+{% block title %}{{ heading }}{% endblock %}
+{% block lede %}Something went wrong with that request.{% endblock %}
+
 {% block content %}
-<section>
-  <p style="margin:0"><strong>The order desk cannot take bookings right now.</strong> {{ message }} Try again in a few minutes.</p>
+<section class="card" aria-labelledby="error-title">
+  <div class="card-body">
+    <p class="eyebrow" style="color:var(--muted)">Error {{ status }}</p>
+    <h2 id="error-title" style="margin:0;font-size:1.25rem;color:var(--ink)">{{ heading }}</h2>
+    <p style="margin:8px 0 0">{{ message }}</p>
+    <div class="actions" style="margin-top:20px">
+      <p>If this keeps happening, contact the Onward operations team.</p>
+      <a class="btn" href="/">Go to the order desk</a>
+    </div>
+  </div>
 </section>
 {% endblock %}

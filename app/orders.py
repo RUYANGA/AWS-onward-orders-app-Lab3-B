@@ -19,16 +19,19 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
 
+# "label" is the full text; "name" and "detail" are the short forms the UI shows.
 ZONES: dict[str, dict] = {
-    "A": {"label": "A, central (hub district)", "ring": 0},
-    "B": {"label": "B, inner suburbs", "ring": 1},
-    "C": {"label": "C, outer suburbs", "ring": 2},
-    "D": {"label": "D, peri-urban", "ring": 3},
+    "A": {"label": "A, central (hub district)", "name": "Central", "detail": "Hub district", "ring": 0},
+    "B": {"label": "B, inner suburbs", "name": "Inner suburbs", "detail": "1 ring from the hub", "ring": 1},
+    "C": {"label": "C, outer suburbs", "name": "Outer suburbs", "detail": "2 rings from the hub", "ring": 2},
+    "D": {"label": "D, peri-urban", "name": "Peri-urban", "detail": "3 rings from the hub", "ring": 3},
 }
 
 SPEEDS: dict[str, dict] = {
-    "standard": {"label": "Standard (same day if booked before 16:00)", "base": Decimal("2.50")},
-    "express": {"label": "Express (within 3 hours)", "base": Decimal("4.50")},
+    "standard": {"label": "Standard (same day if booked before 16:00)", "name": "Standard",
+                 "detail": "Same day if booked before 16:00", "base": Decimal("2.50")},
+    "express": {"label": "Express (within 3 hours)", "name": "Express",
+                "detail": "Delivered within 3 hours", "base": Decimal("4.50")},
 }
 
 RING_FEE = Decimal("1.20")

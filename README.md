@@ -8,6 +8,13 @@ The page shows the owner's name, the lab name, and the instance ID, Availability
 private IP of the server that answered (read from IMDSv2). Responses are never cached, so
 each refresh goes back through the load balancer.
 
+![Booking page](docs/screenshots/booking-desktop.png)
+
+The interface is server-rendered HTML with inline CSS only: the Content-Security-Policy allows no
+scripts, external fonts or images, which also keeps the page fast on mobile data. More screens:
+[validation](docs/screenshots/validation-desktop.png), [confirmation](docs/screenshots/confirmation-desktop.png),
+[mobile](docs/screenshots/booking-mobile.png).
+
 ## Repository layout
 
 ```

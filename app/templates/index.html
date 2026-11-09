@@ -1,48 +1,129 @@
 {% extends "base.html" %}
+{% block title %}{{ 'Check your booking' if errors else 'Book a delivery' }}{% endblock %}
+
+{% macro error_for(field) -%}
+  {% if errors[field] %}<span class="err" id="{{ field }}-error">{{ errors[field] }}</span>{% endif %}
+{%- endmacro %}
+{% macro invalid(field) -%}
+  {% if errors[field] %} aria-invalid="true" aria-describedby="{{ field }}-error"{% endif %}
+{%- endmacro %}
+
 {% block content %}
-<section>
-  <h2 style="margin:0 0 12px;font-size:1.1rem">Book a delivery</h2>
-  <form method="post" action="/orders" novalidate>
-    <label>Merchant
-      <input name="merchant" value="{{ form.get('merchant','') }}" autocomplete="organization"
-             class="{{ 'invalid' if errors.merchant }}" required>
-      {% if errors.merchant %}<span class="err">{{ errors.merchant }}</span>{% endif %}
-    </label>
-    <label>Recipient phone
-      <input name="recipient_phone" type="tel" inputmode="tel" value="{{ form.get('recipient_phone','') }}"
-             class="{{ 'invalid' if errors.recipient_phone }}" required>
-      {% if errors.recipient_phone %}<span class="err">{{ errors.recipient_phone }}</span>{% endif %}
-    </label>
-    <div class="row">
-      {% for field, title in [('pickup_zone', 'Pickup area'), ('dropoff_zone', 'Delivery area')] %}
-      <label>{{ title }}
-        <select name="{{ field }}" class="{{ 'invalid' if errors[field] }}">
-          <option value="">Choose</option>
-          {% for code, z in zones.items() %}
-          <option value="{{ code }}" {{ 'selected' if form.get(field) == code }}>{{ z.label }}</option>
-          {% endfor %}
-        </select>
-        {% if errors[field] %}<span class="err">{{ errors[field] }}</span>{% endif %}
-      </label>
-      {% endfor %}
+<section class="card" aria-labelledby="form-title">
+  <div class="card-head">
+    <h2 id="form-title">Book a delivery</h2>
+    <p>Fill in the four steps below. All fields are required unless marked optional.</p>
+  </div>
+  <div class="card-body">
+    {% if errors %}
+    <div class="alert alert-danger" role="alert" aria-labelledby="error-title">
+      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="none" stroke="#c62828" stroke-width="2"/><path d="M10 5.5v5.5M10 14v.5" stroke="#c62828" stroke-width="2" stroke-linecap="round"/></svg>
+      <div>
+        <strong id="error-title">Please fix {{ errors|length }} {{ 'field' if errors|length == 1 else 'fields' }} to book this delivery</strong>
+        <ul>{% for field, message in errors.items() %}<li><a href="#{{ 'speed-' ~ (speeds|list|first) if field == 'speed' else field }}">{{ message }}</a></li>{% endfor %}</ul>
+      </div>
     </div>
-    <div class="row">
-      <label>Weight in kg <span class="hint">0.1 to 30</span>
-        <input name="weight_kg" inputmode="decimal" value="{{ form.get('weight_kg','') }}"
-               class="{{ 'invalid' if errors.weight_kg }}" required>
-        {% if errors.weight_kg %}<span class="err">{{ errors.weight_kg }}</span>{% endif %}
-      </label>
-      <label>Speed
-        <select name="speed" class="{{ 'invalid' if errors.speed }}">
+    {% endif %}
+
+    <form method="post" action="/orders" novalidate>
+      <fieldset class="step">
+        <legend><span class="num">1</span> Merchant and recipient</legend>
+        <div class="fields">
+          <div class="field">
+            <label for="merchant">Merchant name</label>
+            <input type="text" id="merchant" name="merchant" value="{{ form.get('merchant', '') }}"
+                   autocomplete="organization" maxlength="80" placeholder="e.g. Kofi Phones"{{ invalid('merchant') }}>
+            {{ error_for('merchant') }}
+          </div>
+          <div class="field">
+            <label for="recipient_phone">Recipient phone</label>
+            <input type="tel" id="recipient_phone" name="recipient_phone" value="{{ form.get('recipient_phone', '') }}"
+                   inputmode="tel" autocomplete="tel" placeholder="+233 24 123 4567"{{ invalid('recipient_phone') }}>
+            {{ error_for('recipient_phone') }}
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend><span class="num">2</span> Route</legend>
+        <div class="fields">
+          {% for field, title in [('pickup_zone', 'Pickup area'), ('dropoff_zone', 'Delivery area')] %}
+          <div class="field">
+            <label for="{{ field }}">{{ title }}</label>
+            <select id="{{ field }}" name="{{ field }}"{{ invalid(field) }}>
+              <option value="">Choose an area</option>
+              {% for code, z in zones.items() %}
+              <option value="{{ code }}"{{ ' selected' if form.get(field) == code }}>Area {{ code }} · {{ z.name }} ({{ z.detail }})</option>
+              {% endfor %}
+            </select>
+            {{ error_for(field) }}
+          </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <fieldset class="step">
+        <legend><span class="num">3</span> Parcel</legend>
+        <div class="fields">
+          <div class="field">
+            <label for="weight_kg">Weight <span class="hint">{{ '%g'|format(pricing.min_kg) }} to {{ '%g'|format(pricing.max_kg) }} kg</span></label>
+            <div class="suffix">
+              <input type="number" id="weight_kg" name="weight_kg" value="{{ form.get('weight_kg', '') }}"
+                     inputmode="decimal" step="0.1" min="{{ pricing.min_kg }}" max="{{ pricing.max_kg }}" placeholder="1.5"{{ invalid('weight_kg') }}>
+              <span aria-hidden="true">kg</span>
+            </div>
+            {{ error_for('weight_kg') }}
+          </div>
+          <div class="field">
+            <span class="label">Handling <span class="hint">optional</span></span>
+            <label class="toggle" for="fragile">
+              <input type="checkbox" id="fragile" name="fragile"{{ ' checked' if form.get('fragile') }}>
+              <span><strong>Fragile, handle with care</strong><span class="hint">Adds ${{ pricing.fragile_fee }}</span></span>
+            </label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset class="step"{% if errors.speed %} aria-describedby="speed-error"{% endif %}>
+        <legend><span class="num">4</span> Service</legend>
+        <div class="options">
           {% for code, s in speeds.items() %}
-          <option value="{{ code }}" {{ 'selected' if form.get('speed', 'standard') == code }}>{{ s.label }}</option>
+          <div class="option">
+            <input type="radio" id="speed-{{ code }}" name="speed" value="{{ code }}"{{ ' checked' if form.get('speed', 'standard') == code }}>
+            <label class="tile" for="speed-{{ code }}">
+              <span class="tile-top"><span class="tile-name">{{ s.name }}</span><span class="tile-price">from ${{ s.base }}</span></span>
+              <span class="tile-detail">{{ s.detail }}</span>
+            </label>
+          </div>
           {% endfor %}
-        </select>
-        {% if errors.speed %}<span class="err">{{ errors.speed }}</span>{% endif %}
-      </label>
-    </div>
-    <label class="check"><input type="checkbox" name="fragile" {{ 'checked' if form.get('fragile') }}> Fragile, handle with care</label>
-    <div><button type="submit">Book delivery</button></div>
-  </form>
+        </div>
+        {{ error_for('speed') }}
+      </fieldset>
+
+      <div class="actions">
+        <p>You'll see the full price breakdown and a booking reference on the next screen.</p>
+        <button class="btn" type="submit">
+          Book delivery
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block sidebar %}
+<section class="card side" aria-labelledby="pricing-title">
+  <div class="card-body">
+    <h3 id="pricing-title">How pricing works</h3>
+    <dl class="kv">
+      {% for code, s in speeds.items() %}<div><dt>{{ s.name }} base fee</dt><dd>${{ s.base }}</dd></div>{% endfor %}
+      <div><dt>Each area ring crossed</dt><dd>${{ pricing.ring_fee }}</dd></div>
+      <div><dt>First {{ pricing.included_kg }} kg</dt><dd>Included</dd></div>
+      <div><dt>Each extra kg</dt><dd>${{ pricing.extra_kg_fee }}</dd></div>
+      <div><dt>Fragile handling</dt><dd>${{ pricing.fragile_fee }}</dd></div>
+    </dl>
+    <p class="note">Areas A to D are rings around the hub. A trip from A to C crosses 2 rings.</p>
+  </div>
 </section>
 {% endblock %}
