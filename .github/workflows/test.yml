@@ -1,0 +1,20 @@
+# Runs the app tests on every pull request and on every push to main.
+# Servers run whatever commit AppVersion names, so main must always pass.
+name: test
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # same as the servers
+      - run: pip install -r requirements-dev.txt
+      - name: App tests
+        run: python -m pytest -q
