@@ -1,8 +1,8 @@
-# onward-orders-app
+# AWS-onward-orders-app-Lab3-B
 
 The Onward Logistics order application: one full-stack Python app (Flask) that serves the
 order form and the order logic together. It runs on the EC2 servers created by
-[onward-orders-infrastructure](https://github.com/RUYANGA/onward-orders-infrastructure).
+[AWS-onward-orders-infrastructure-Lab3-B](https://github.com/RUYANGA/AWS-onward-orders-infrastructure-Lab3-B).
 
 The page shows the owner's name, the lab name, and the instance ID, Availability Zone and
 private IP of the server that answered (read from IMDSv2). Responses are never cached, so
@@ -50,10 +50,10 @@ flask --app wsgi run --port 8000
 ## How it reaches the servers
 
 At first boot each server clones this repository at the `AppVersion` set in
-`deployments/dev/orders.yaml` in onward-orders-infrastructure, installs `requirements.txt`
+`deployments/dev/orders.yaml` in AWS-onward-orders-infrastructure-Lab3-B, installs `requirements.txt`
 into a virtualenv and runs gunicorn from the repository root. This repository must stay
 **public** so the servers can clone it without credentials.
 
 **Releasing a new version:** merge to `main`, tag it (for example `v1.1.0`), then set
-`AppVersion: v1.1.0` in onward-orders-infrastructure and commit there. CloudFormation
+`AppVersion: v1.1.0` in AWS-onward-orders-infrastructure-Lab3-B and commit there. CloudFormation
 replaces the servers one at a time.

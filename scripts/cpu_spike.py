@@ -3,7 +3,7 @@
 
 Run on the servers through the Systems Manager Run Command document
 onward-<env>-orders-cpu-spike (see scripts/demo/2-cpu-spike.sh in
-onward-orders-infrastructure). It is never
+AWS-onward-orders-infrastructure-Lab3-B). It is never
 reachable from the website, so nobody on the internet can trigger it.
 The time limit (max 15 minutes) caps the cost of a demo.
 """
